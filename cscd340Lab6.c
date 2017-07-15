@@ -15,20 +15,22 @@ int main()
     LinkedList * historyList = linkedList();
     LinkedList * aliasList = linkedList();
     FILE * mshrc = fopen(".mshrc", "r+");
+    FILE * msh_history = fopen(".msh_history", "r+");
     
     if(mshrc == NULL)
     {
         mshrc = fopen(".mshrc", "w+");
         fprintf(mshrc, "%s%d\n", "HISTCOUNT=", 100);
-        fprintf(mshrc, "%s%d\n", "HISTFILECOUNT=", 200);
+        fprintf(mshrc, "%s%d\n", "HISTFILECOUNT=", 1000);
         // set up alias structure
         // set up PATH structure
     }
     else
     {
+        
         // check format of existing .mshrc
-        // fill historyList according to .mshrc contents
-        // fill alias list too
+        // fill historyList according to .msh_history contents
+        // fill aliasList according to .mshrc contents (if there are any in there)
     }
 
     // display prompt
