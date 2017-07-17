@@ -202,7 +202,7 @@ Node * searchList(LinkedList * theList, Node * nn, void (*removeData)(void *), i
 
     if(theList->size == 0)
     {
-        printf("Empty list to searchList\n");
+        //printf("Empty list to searchList\n");
     }
     else
     {

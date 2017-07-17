@@ -58,7 +58,6 @@ int main()
             }
             else if(strstr(s, "alias ") == s) // alias at beginning of line
             {
-                // check if valid maybe (the format 'alias ali="command"', not the command itself), then save entire s to alias->command
                 void * newAlias = buildTypeAlias(s);
                 addLast(aliasList, buildNode_Type(newAlias));
             }
@@ -99,7 +98,29 @@ int main()
         }
         else if(strstr(s, "cd") != NULL)
         {
-
+            if(strstr(s, "cd ") == s)
+            {
+                char * copy = (char *) calloc(strlen(s) + 1, sizeof(char));
+                char * copyPointer = copy; // for keeping original location of copy after it gets mangled, so it can be freed
+                strncpy(copy, s, strlen(s));
+                char * newDir = strtok_r(copy, " ", &copy);
+                newDir = strtok_r(NULL, " ", &copy);
+                int result = chdir(newDir);
+                if(result == -1)
+                {
+                    printf("Invalid directory\n");
+                }
+                else
+                {
+                    char workingDir[128];
+                    getcwd(workingDir, sizeof(workingDir));
+                    printf("Directory changed to '%s'\n", workingDir);
+                }
+            }
+            else
+            {
+                printf("Invalid command\n");
+            }
         }
         else if(strstr(s, "!") != NULL) // don't forget that these should be pipeable
         {
