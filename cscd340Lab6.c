@@ -7,6 +7,9 @@
 #include "./alias/alias.h"
 #include "./history/history.h"
 
+void redirect(char ** command, char * output);
+void trim(char ** word);
+
 int main()
 {
     // check .mshrc -- create it if necessary w/ default values
@@ -105,6 +108,7 @@ int main()
                 strncpy(copy, s, strlen(s));
                 char * newDir = strtok_r(copy, " ", &copy);
                 newDir = strtok_r(NULL, " ", &copy);
+
                 int result = chdir(newDir);
                 if(result == -1)
                 {
@@ -139,7 +143,18 @@ int main()
         }
         else if(strstr(s, ">") != NULL)
         {
+            char * copy = (char *) calloc(strlen(s) + 1, sizeof(char));
+            char * copyPointer = copy; // for keeping original location of copy after it gets mangled, so it can be freed
+            strncpy(copy, s, strlen(s));
+            char * from = strtok_r(copy, ">", &copy);
+            char * to = strtok_r(NULL, ">", &copy);
+            trim(&from);
+            trim(&to);
+            
+            char ** fromArgs = NULL;
+            makeargs(from, &fromArgs);
 
+            redirect(fromArgs, to);
         }
 
         else  // perform command as normal
@@ -217,4 +232,90 @@ int main()
     fclose(mshrc);
 
     return 0;
+}
+
+void redirect(char ** command, char * output)
+{
+    pid_t pid1, pid2;
+    int status;
+
+    pid1 = fork();
+
+	if(pid1 != 0)  // parent
+	{
+		waitpid(pid1, &status, 0);
+	}
+	else  // child
+	{
+		int fd[2];
+        int res = pipe(fd);
+
+        if(res < 0)
+        {
+            printf("Pipe Failure\n");
+            exit(-1);
+        }// end if
+        
+        pid2 = fork();
+
+        if(pid2 != 0)  // "parent" (child of a.out)
+        {
+            close(fd[1]);
+            close(0);
+            dup(fd[0]);
+            close(fd[0]);
+            
+            FILE * outfile = fopen(output, "w");
+            char commandOutput[MAX];
+            //stdin is the output of the other process, as though it were piped here
+            while(fgets(commandOutput, MAX, stdin))
+            {
+                fprintf(outfile, "%s", commandOutput);
+            }
+
+            fclose(outfile);
+            exit(0);
+        }
+        else  // "child" (grandchild of a.out)
+        {
+            close(fd[0]);
+            int thing = close(1);
+            int stdout_cpy = dup(fd[1]);
+            //dup2(fd[1], 1);
+            close(fd[1]);
+            execvp(command[0], command);
+
+            // reopen stdout so we don't pipe "Invalid command" to the wc -w and just get 2
+            dup2(stdout_cpy, fd[1]);
+            dup2(thing, 1);
+            printf("Invalid command\n");
+            exit(-1);
+        }
+	}
+}
+
+// remove space ' ' on either end of the string. Does NOT remove it in the middle.
+void trim(char ** word)
+{
+	if(word == NULL)
+	{
+		perror("word is null");
+		exit(-99);
+	}// end if
+
+    strip(*word);
+
+	int length = strlen(*word);
+
+    if(length > 1)
+    {
+        if((*word)[0] == ' ')
+        {
+            *word = *word + 1;
+        }
+        if((*word)[length - 1] == ' ')
+        {
+            (*word)[length - 1] = '\0';
+        }
+    }
 }
