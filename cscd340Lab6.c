@@ -18,19 +18,20 @@ int main()
     LinkedList * historyList = linkedList();
     LinkedList * aliasList = linkedList();
     FILE * mshrc = fopen(".mshrc", "r+");
-    FILE * msh_history = fopen(".msh_history", "r+");
+    FILE * msh_history = fopen(".msh_history", "w+");
+    int histCount = 100, histFileCount = 1000;
     
     if(mshrc == NULL)
     {
         mshrc = fopen(".mshrc", "w+");
-        fprintf(mshrc, "%s%d\n", "HISTCOUNT=", 100);
-        fprintf(mshrc, "%s%d\n", "HISTFILECOUNT=", 1000);
+        fprintf(mshrc, "%s%d\n", "HISTCOUNT=", histCount);
+        fprintf(mshrc, "%s%d\n", "HISTFILECOUNT=", histFileCount);
+        
         // set up alias structure
         // set up PATH structure
     }
     else
     {
-        
         // check format of existing .mshrc
         // fill historyList according to .msh_history contents
         // fill aliasList according to .mshrc contents (if there are any in there)
@@ -46,12 +47,14 @@ int main()
     printf("command?: ");
     fgets(s, MAX, stdin);
     strip(s);
+    addLast(historyList, buildNode_Type(buildTypeHistory(s)));
+    //need to start removing first if after histFileCount!!!!!!!!
 
     while(strcmp(s, "exit") != 0)
     {
         if(strcmp(s, "history") == 0)
         {
-            printList(historyList, printTypeHistory);
+            printHistoryList(historyList, histCount);
         }
         else if(strstr(s, "alias") != NULL)
         {
@@ -159,8 +162,6 @@ int main()
 
         else  // perform command as normal
         {
-            //add to history (even if invalid or duplicate)
-
             // check if in alias list
             char * copy = (char *) calloc(strlen(s) + 1, sizeof(char));
             char * copyPointer = copy; // for keeping original location of copy after it gets mangled, so it can be freed
@@ -184,9 +185,6 @@ int main()
                     pipeIt(prePipe, postPipe);
                     clean(preCount, prePipe);
                     clean(postCount, postPipe);
-
-                    // I think I need to do a makeargs or something here to save it to history... or just save prePipe, "|", and postPipe?
-
                 }// end if pipeCount
 
                 else
@@ -194,8 +192,6 @@ int main()
                     argc = makeargs(s, &argv);
                     if(argc != -1)
                     {
-                        // save to history
-                        
                         forkIt(argv);
                         clean(argc, argv);
                         argv = NULL;
@@ -207,11 +203,10 @@ int main()
             copyPointer = NULL;
         }
 
-        // Save whatever it was in history
-
         printf("command?: ");
         fgets(s, MAX, stdin);
         strip(s);
+        addLast(historyList, buildNode_Type(buildTypeHistory(s)));
 
     }// end while
 
@@ -229,6 +224,7 @@ int main()
 
     printf("Silly Shell Ended\n");
 
+    fclose(msh_history);
     fclose(mshrc);
 
     return 0;

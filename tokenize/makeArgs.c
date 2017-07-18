@@ -45,16 +45,19 @@ int makeargs(char *s, char *** argv)
 		return -1;
 	}
 
+	char * copy2 = (char *) calloc(strlen(s) + 1, sizeof(char));
+	char * copyPointer2 = copy2; // for keeping original location of copy after it gets mangled, so it can be freed
+	strncpy(copy2, s, strlen(s));
+
 	(*argv) = (char **) calloc(tokenCount + 1, sizeof(char *));
-	char * token = strtok_r(s, delim, &s);
-	strip(token);
+	char * token = strtok_r(copy2, delim, &copy2);
 	(*argv)[0] = (char *) calloc(strlen(token) + 1, sizeof(char));
 	strncpy((*argv)[0], token, strlen(token));
 	
 	int x;
 	for(x = 1; x < tokenCount; x++)
 	{
-		token = strtok_r(NULL, delim, &s);
+		token = strtok_r(NULL, delim, &copy2);
 		strip(token);
 		(*argv)[x] = (char *) calloc(strlen(token) + 1, sizeof(char));
 		strncpy((*argv)[x], token, strlen(token));
@@ -63,6 +66,9 @@ int makeargs(char *s, char *** argv)
 	// One more to add the NULL terminating token
 	//(*argv)[x] = (char *) calloc(1, sizeof(char));
 	(*argv)[x] = NULL;
+
+	free(copyPointer2);
+	copyPointer2 = NULL;
 
 	return tokenCount;
 }// end makeArgs

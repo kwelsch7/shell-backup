@@ -4,19 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../linkedlist/linkedList.h"
 #include "../utils/myUtils.h"
 
 struct history
 {
-   // the history number?
-   char * command;
-   char ** argv;
-   int argc;
+   char * fullLine;
 };
 typedef struct history History;
 
 void cleanTypeHistory(void * ptr);
-void * buildTypeHistory(FILE * fin);
-void printTypeHistory(void * passedIn);
+void * buildTypeHistory(char * command);
+void printTypeHistory(int count, void * passedIn);
+void printHistoryList(const LinkedList * theList, int histCount);
 
 #endif
