@@ -91,15 +91,41 @@ int main()
         {
             if(strcmp(s, "echo $PATH") == 0)
             {
-
+                // May need to consider my local variable
+                printf("%s\n", getenv("PATH"));
             }
             else if(strstr(s, "PATH=") == s) // setting path is at beginning of string
             {
+                char * copy = (char *) calloc(strlen(s) + 1, sizeof(char));
+                char * copyPointer = copy; // for keeping original location of copy after it gets mangled, so it can be freed
+                strncpy(copy, s, strlen(s));
+                char * newPath = strtok_r(copy, "=", &copy);
+                newPath = strtok_r(NULL, "=", &copy);
 
+                if(strstr(newPath, "$PATH") != NULL)
+                {
+                    // assume it's at the beginning of the string and followed by :
+                    newPath = newPath + 6; // moves the pointer past $PATH:
+                    char * curPath = getenv("PATH");
+                    char * fullPath = (char *) calloc(strlen(curPath) + strlen(newPath) + 2, sizeof(char));
+                    sprintf(fullPath, "%s:%s", curPath, newPath);
+
+                    setenv("PATH", fullPath, 1);
+
+                    free(fullPath);
+                    fullPath = NULL;
+                }
+                else
+                {
+                    setenv("PATH", newPath, 1);
+                }
+
+                free(copyPointer);
+                copyPointer = NULL;
             }
             else
             {
-
+                printf("Invalid command\n");
             }
         }
         else if(strstr(s, "cd") != NULL)
