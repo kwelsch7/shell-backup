@@ -4,7 +4,11 @@ LinkedList * linkedList()
 {
     LinkedList * theList = (LinkedList *) calloc(1, sizeof(LinkedList));
     theList->head = (Node *) calloc(1, sizeof(Node));
+    theList->tail = (Node *) calloc(1, sizeof(Node));
     theList->size = 0;
+
+    theList->head->next = theList->tail;
+    theList->tail->prev = theList->head;
 
     return theList;
 }
@@ -17,11 +21,10 @@ void addLast(LinkedList * theList, Node * nn)
         exit(-99);
     }
 
-    Node * cur = theList->head;
-    for( ; cur->next != NULL; cur = cur->next);
-
-    cur->next = nn;
-    nn->prev = cur;
+    nn->next = theList->tail;
+    nn->prev = theList->tail->prev;
+    theList->tail->prev->next = nn;
+    theList->tail->prev = nn;
     theList->size++;
 }
 
@@ -40,6 +43,27 @@ void addFirst(LinkedList * theList, Node * nn)
     theList->size++;
 }
 
+Node * getSecondToLast(const LinkedList * theList)
+{
+    if(theList == NULL)
+    {
+        perror("Null parameter to getLast\n");
+        exit(-99);
+    }
+    if(theList->size == 0)
+    {
+        printf("Empty list to getLast");
+    }
+    if(theList->size == 1)
+    {
+        printf("Only one item in list");
+    }
+    else
+    {
+        return theList->tail->prev->prev;
+    }
+}
+
 void removeFirst(LinkedList * theList, void (*removeData)(void *))
 {
     if(theList == NULL)
@@ -56,8 +80,7 @@ void removeFirst(LinkedList * theList, void (*removeData)(void *))
     {
         Node * oldNode = theList->head->next;
         theList->head->next = theList->head->next->next;
-        if(theList->size > 1)
-            theList->head->next->prev = theList->head;
+        theList->head->next->prev = theList->head;
         oldNode->prev = NULL;
         oldNode->next = NULL;
         removeData(oldNode->data);
@@ -83,15 +106,16 @@ void removeLast(LinkedList * theList, void (*removeData)(void *))
     }
     else
     {
-        Node * cur = theList->head;
-        for( ; cur->next != NULL; cur = cur->next);
-        cur->prev->next = NULL;
-        cur->prev = NULL;
-        removeData(cur->data);
-        free(cur->data);
-        cur->data = NULL;
-        free(cur);
-        cur = NULL;
+        Node * oldNode = theList->tail->prev;
+        theList->tail->prev = theList->tail->prev->prev;
+        theList->tail->prev->next = theList->tail;
+        oldNode->prev = NULL;
+        oldNode->next = NULL;
+        removeData(oldNode->data);
+        free(oldNode->data);
+        oldNode->data = NULL;
+        free(oldNode);
+        oldNode = NULL;
         theList->size--;
     }
 }
@@ -111,22 +135,19 @@ void removeItem(LinkedList * theList, Node * nn, void (*removeData)(void *), int
     else
     {
         Node * cur = theList->head->next;
-        while(cur != NULL && compare(cur->data, nn->data) != 0)
+        while(cur != theList->tail && compare(cur->data, nn->data) != 0)
         {
             cur = cur->next;
         }
-        if(cur == NULL)
+        if(cur == theList->tail)
         {
             printf("Not found\n");
         }
         else
         {
             cur->prev->next = cur->next;
-            if(cur->next != NULL)
-            {
-                cur->next->prev = cur->prev;
-                cur->next = NULL;
-            }
+            cur->next->prev = cur->prev;
+            cur->next = NULL;
             cur->prev = NULL;
             removeData(cur->data);
             free(cur->data);
@@ -152,7 +173,7 @@ void clearList(LinkedList * theList, void (*removeData)(void *))
         Node * cur = theList->head->next;
         Node * prev;
 
-        while(cur != NULL)
+        while(cur != theList->tail)
         {
             prev = cur;
             cur = cur->next;
@@ -165,6 +186,8 @@ void clearList(LinkedList * theList, void (*removeData)(void *))
 
         free(theList->head);
         theList->head = NULL;
+        free(theList->tail);
+        theList->tail = NULL;
     }
 }
 
@@ -182,7 +205,7 @@ void printList(const LinkedList * theList, void (*convertData)(void *))
     else
     {
         Node * cur = theList->head->next;
-        while(cur != NULL)
+        while(cur != theList->tail)
         {
             convertData(cur->data);
             cur = cur->next;
@@ -207,11 +230,11 @@ Node * searchList(LinkedList * theList, Node * nn, void (*removeData)(void *), i
     else
     {
         Node * cur = theList->head->next;
-        while(cur != NULL && compare(cur->data, nn->data) != 0)
+        while(cur != theList->tail && compare(cur->data, nn->data) != 0)
         {
             cur = cur->next;
         }
-        if(cur != NULL)
+        if(cur != theList->tail)
         {
             foundNode = cur;
         }

@@ -43,6 +43,7 @@ typedef struct node Node;
 struct linkedlist
 {
     Node * head;
+    Node * tail;
     int size;
 };
 typedef struct linkedlist LinkedList;
@@ -50,6 +51,7 @@ typedef struct linkedlist LinkedList;
 LinkedList * linkedList();
 void addLast(LinkedList * theList, Node * nn);
 void addFirst(LinkedList * theList, Node * nn);
+Node * getSecondToLast(const LinkedList * theList);
 void removeFirst(LinkedList * theList, void (*removeData)(void *));
 void removeLast(LinkedList * theList, void (*removeData)(void *));
 void removeItem(LinkedList * theList, Node * nn, void (*removeData)(void *), int (*compare)(const void *, const void *));

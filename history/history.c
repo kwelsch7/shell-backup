@@ -57,7 +57,7 @@ void printHistoryList(const LinkedList * theList, int histCount)
         if(theList->size > histCount)
         {
             int startingPoint = theList->size - histCount;
-            while(cur != NULL && count <= startingPoint)
+            while(cur != theList->tail && count <= startingPoint)
             {
                 cur = cur->next;
                 count++;
@@ -65,7 +65,7 @@ void printHistoryList(const LinkedList * theList, int histCount)
             count = 1;
         }
 
-        while(cur != NULL && count <= histCount)
+        while(cur != theList->tail && count <= histCount)
         {
             printTypeHistory(count, cur->data);
             cur = cur->next;
