@@ -176,15 +176,117 @@ void bangSubChecks(char * s, LinkedList * historyList, LinkedList * aliasList, i
         printf("%s\n", ((History *)(lastCommand->data))->fullLine);
         doCommand(((History *)(lastCommand->data))->fullLine, historyList, aliasList, histCount);
     }
-    else if(strstr(s, "!") == s)// should be !number; e.g. !25, !2, etc
+    else if(strstr(s, "|") != NULL)
     {
-        // check for piping; could be left only or both sides
+        char * copy = (char *) calloc(strlen(s) + 1, sizeof(char));
+        char * copyPointer = copy; // for keeping original location of copy after it gets mangled, so it can be freed
+        strncpy(copy, s, strlen(s));
 
+        // check if I need to trim these
+        char * firstCommand = strtok_r(copy, "|", &copy);
+        char * secondCommand = strtok_r(NULL, "|", &copy);
+        trim(&firstCommand);
+        trim(&secondCommand);
+        char * actualCmd1 = NULL;
+        char * actualCmd2 = NULL;
+
+        if(firstCommand[0] == '!')
+        {
+            actualCmd1 = getCommandFromHistory(firstCommand, historyList, histCount);
+        }
+        else
+        {
+            actualCmd1 = firstCommand;
+        }
+        if(secondCommand[0] == '!')
+        {
+            actualCmd2 = getCommandFromHistory(secondCommand, historyList, histCount);
+        }
+        else
+        {
+            actualCmd2 = secondCommand;
+        }
+
+        char * replacedCommand = (char *) calloc(strlen(actualCmd1) + strlen(actualCmd2) + 4, sizeof(char));
+        sprintf(replacedCommand, "%s | %s", actualCmd1, actualCmd2);
+
+        printf("%s\n", replacedCommand);
+        doCommand(replacedCommand, historyList, aliasList, histCount);
+
+        free(copyPointer);
+        copyPointer = NULL;
+        free(replacedCommand);
+        replacedCommand = NULL;
+    }
+    else if(strstr(s, "!") == s) // should be !number; e.g. !25, !2, etc
+    {
+        // just go replace the command and call doCommand on it
+        char * actualCommand = getCommandFromHistory(s, historyList, histCount);
+        printf("%s\n", actualCommand);
+        doCommand(actualCommand, historyList, aliasList, histCount);
     }
     else
     {
-        // check for piping (would only be on the right side in this case)
+        printf("Invalid command\n");
     }
+}
+
+char * getCommandFromHistory(char * bangNumber, LinkedList * historyList, int histCount)
+{
+    if(historyList == NULL)
+    {
+        perror("Null list to getCommandFromHistory\n");
+        exit(-99);
+    }
+    if(historyList->size <= 1)  // the 1 because the ! command itself is stored (as far as this assignment goes)
+    {
+        printf("Nothing in history\n");
+    }
+    else
+    {
+        int commandNumber = getNumberFromBangCommand(bangNumber);
+        // Do I want the other hist info here???
+        if(commandNumber > histCount)
+        {
+            printf("Command is out of range of saved history\n");
+        }
+        int curNumber = 1;
+        Node * cur = historyList->head->next;
+
+        if(historyList->size > histCount) // and if I do with the other hist info, do I want it here too??
+        {
+            int startingPoint = historyList->size - histCount;
+            while(cur != historyList->tail && curNumber <= startingPoint)
+            {
+                cur = cur->next;
+                curNumber++;
+            }
+            curNumber = 1;
+        }
+
+        while(cur != historyList->tail && commandNumber != curNumber)
+        {
+            cur = cur->next;
+            curNumber++;
+        }
+
+        if(cur == historyList->tail) // this shouldn't be reached because of the check of commandNumber vs. histCount earlier
+        {
+            printf("Unsuccessfully traversed list in getCommandFromHistory");
+        }
+        else
+        {
+            return ((History *)(cur->data))->fullLine;
+        }
+    }
+}
+
+int getNumberFromBangCommand(char * s)
+{
+    char * numberPointer = s + 1;
+    int theNumber = atoi(numberPointer);
+
+    return theNumber;
 }
 
 void redirectSetup(char * s)

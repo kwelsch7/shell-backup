@@ -12,6 +12,8 @@ void aliasSubChecks(char * s, LinkedList * aliasList);
 void pathSubChecks(char * s);
 void cdSubChecks(char * s);
 void bangSubChecks(char * s, LinkedList * historyList, LinkedList * aliasList, int histCount);
+char * getCommandFromHistory(char * bangNumber, LinkedList * historyList, int histCount);
+int getNumberFromBangCommand(char * s);
 void redirectSetup(char * s);
 void redirect(char ** command, char * output);
 int checkIfAlias(char * s, LinkedList * aliasList);
