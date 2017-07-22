@@ -43,7 +43,7 @@ void addFirst(LinkedList * theList, Node * nn)
     theList->size++;
 }
 
-Node * getSecondToLast(const LinkedList * theList)
+Node * getLast(const LinkedList * theList)
 {
     if(theList == NULL)
     {
@@ -54,13 +54,9 @@ Node * getSecondToLast(const LinkedList * theList)
     {
         printf("Empty list to getLast");
     }
-    if(theList->size == 1)
-    {
-        printf("Only one item in list");
-    }
     else
     {
-        return theList->tail->prev->prev;
+        return theList->tail->prev;
     }
 }
 

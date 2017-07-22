@@ -27,18 +27,25 @@ void * buildTypeHistory(char * command)
     return hist;
 }
 
-void printTypeHistory(int count, void * passedIn)
+void printTypeHistory(int count, void * passedIn, FILE * target)
 {
-    if(passedIn == NULL)
+    if(passedIn == NULL || target == NULL)
     {
-        perror("Null parameter to printTypeHistory\n");
+        perror("Null parameter(s) to printTypeHistory\n");
         exit(-99);
     }
 
-    printf("  %d  %s\n", count, ((History *)passedIn)->fullLine);
+    if(target == stdout)
+    {
+        fprintf(target, "  %d  %s\n", count, ((History *)passedIn)->fullLine);
+    }
+    else
+    {
+        fprintf(target, "%s\n", ((History *)passedIn)->fullLine);
+    }
 }
 
-void printHistoryList(const LinkedList * theList, int histCount)
+void printHistoryList(const LinkedList * theList, int histCount, FILE * target)
 {
     if(theList == NULL)
     {
@@ -67,7 +74,7 @@ void printHistoryList(const LinkedList * theList, int histCount)
 
         while(cur != theList->tail && count <= histCount)
         {
-            printTypeHistory(count, cur->data);
+            printTypeHistory(count, cur->data, target);
             cur = cur->next;
             count++;
         }

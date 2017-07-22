@@ -15,7 +15,7 @@ typedef struct history History;
 
 void cleanTypeHistory(void * ptr);
 void * buildTypeHistory(char * command);
-void printTypeHistory(int count, void * passedIn);
-void printHistoryList(const LinkedList * theList, int histCount);
+void printTypeHistory(int count, void * passedIn, FILE * target);
+void printHistoryList(const LinkedList * theList, int histCount, FILE * target);
 
 #endif

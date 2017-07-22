@@ -16,7 +16,7 @@ int doCommand(char * s, LinkedList * historyList, LinkedList * aliasList, int hi
     // Check a bunch of specific commands before passing it off to bash
     if(strcmp(s, "history") == 0)
     {
-        printHistoryList(historyList, histCount);
+        printHistoryList(historyList, histCount, stdout);
     }
     else if(strstr(s, "alias") != NULL)
     {
@@ -169,10 +169,9 @@ void bangSubChecks(char * s, LinkedList * historyList, LinkedList * aliasList, i
 {
     if(strcmp(s, "!!") == 0)
     {
-        // Note -- "!!" was already saved in history as the last.
-        //   theoretically we could just removeLast() so that the "!!" isn't in the history,
-        //   then get the actual last after that
-        Node * lastCommand = getSecondToLast(historyList);
+        // Delete !! as last history item before getting the previous command
+        removeLast(historyList, cleanTypeHistory);
+        Node * lastCommand = getLast(historyList);
         printf("%s\n", ((History *)(lastCommand->data))->fullLine);
         doCommand(((History *)(lastCommand->data))->fullLine, historyList, aliasList, histCount);
     }

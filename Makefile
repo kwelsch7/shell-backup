@@ -1,5 +1,5 @@
-msh:	cscd340Lab6.c ./linkedlist/listUtils.o ./linkedlist/linkedList.o ./tokenize/makeArgs.o ./utils/myUtils.o ./utils/shellUtils.o ./process/process.o ./pipes/pipes.o ./alias/alias.o ./history/history.o
-	gcc -g cscd340Lab6.c ./linkedlist/listUtils.o ./linkedlist/linkedList.o ./tokenize/makeArgs.o ./utils/myUtils.o ./utils/shellUtils.o ./process/process.o ./pipes/pipes.o ./alias/alias.o ./history/history.o -o msh
+msh:	cscd340Lab6.c ./linkedlist/listUtils.o ./linkedlist/linkedList.o ./tokenize/makeArgs.o ./utils/myUtils.o ./utils/shellUtils.o ./process/process.o ./pipes/pipes.o ./alias/alias.o ./history/history.o ./utils/rcAndHistUtils.o
+	gcc -g cscd340Lab6.c ./linkedlist/listUtils.o ./linkedlist/linkedList.o ./tokenize/makeArgs.o ./utils/myUtils.o ./utils/shellUtils.o ./process/process.o ./pipes/pipes.o ./alias/alias.o ./history/history.o ./utils/rcAndHistUtils.o -o msh
 
 linkedList.o:	./linkedlist/linkedList.c ./linkedlist/linkedList.h
 	gcc -g -c ./linkedlist/linkedList.c
@@ -28,7 +28,11 @@ alias.o:	./alias/alias.c ./alias/alias.h
 history.o:	./history/history.c ./history/history.h
 	gcc -g -c ./history/history.c
 
+rcAndHistUtils.o:	./utils/rcAndHistUtils.c ./utils/rcAndHistUtils.h
+	gcc -g -c ./utils/rcAndHistUtils.c
+
 clean:
+	rm ./utils/rcAndHistUtils.o
 	rm ./history/history.o
 	rm ./alias/alias.o
 	rm ./pipes/pipes.o

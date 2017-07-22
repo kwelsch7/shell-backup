@@ -1,4 +1,5 @@
 #include "./utils/shellUtils.h"
+#include "./utils/rcAndHistUtils.h"
 
 void redirect(char ** command, char * output);
 void trim(char ** word);
@@ -26,8 +27,21 @@ int main()
     else
     {
         // check format of existing .mshrc
+        char mshrcContents[MAX];
+        char * setPath = NULL;
+        while(fgets(mshrcContents, MAX, mshrc))
+        {
+            checkMshrcContents(mshrcContents, &histCount, &histFileCount, &setPath);
+        }
         // fill historyList according to .msh_history contents
         // fill aliasList according to .mshrc contents (if there are any in there)
+        // set up PATH
+        if(setPath != NULL)
+        {
+            setenv("PATH", setPath, 1);
+            free(setPath);
+            setPath = NULL;
+        }
     }
 
     // display prompt
@@ -48,8 +62,9 @@ int main()
         addLast(historyList, buildNode_Type(buildTypeHistory(s)));
     }// end while
 
-    // when "exit" command is given, save to .msh_history
-    // from history list and alias list (and PATH..?)
+    // when "exit" command is given, save to .msh_history from historyList
+    printHistoryList(historyList, histFileCount, msh_history);
+    // save alias list and PATH..?
     // -- code here --
 
     clearList(aliasList, cleanTypeAlias);
